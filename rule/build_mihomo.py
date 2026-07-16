@@ -1,8 +1,13 @@
 """
-只负责生成 mihomo 格式 (yaml + mrs)，写入 rule/mihomo/。
+只负责生成 mihomo 格式 (yaml + mrs)，写入 rule/mihomo/domain/ 和 rule/mihomo/ipcidr/。
 由 .github/workflows/mrs.yml 独立触发运行。
 
-注意：如果 links.txt 里有 srs:/adguard: 类型的输入，这里依然需要调用
+- ../links-domain.txt  只提取 domain/domain_suffix (domain_keyword/domain_regex 仍不被 mrs 支持)
+  -> 写到 mihomo/domain/
+- ../links-ipcidr.txt  只提取 ip_cidr (source_ip_cidr 不被 mrs 支持)
+  -> 写到 mihomo/ipcidr/
+
+注意：如果 links-*.txt 里有 srs:/adguard: 类型的输入，这里依然需要调用
 sing-box 做 decompile/convert 拿到中间格式，所以 mrs.yml 里也会装 sing-box，
 但绝不会往 rule/singbox/ 写任何文件。
 """
@@ -12,12 +17,39 @@ import tempfile
 
 import common
 
-OUTPUT_DIR = "./mihomo"
+CATEGORIES = [
+    ("../links-domain.txt", "./mihomo/domain", common.DOMAIN_FIELDS, "domain"),
+    ("../links-ipcidr.txt", "./mihomo/ipcidr", common.IPCIDR_FIELDS, "ipcidr"),
+]
 
 
-def build_one(link, work_dir):
+def build_domain_mrs(filtered, name, output_dir):
+    domain_lines = sorted(filtered.get('domain', set()))
+    domain_lines += sorted('+.' + d.lstrip('.') for d in filtered.get('domain_suffix', set()))
+    if not domain_lines:
+        return False
+    yaml_path = os.path.join(output_dir, f"{name}.yaml")
+    mrs_path = os.path.join(output_dir, f"{name}.mrs")
+    common.yaml.safe_dump({'payload': domain_lines}, open(yaml_path, 'w', encoding='utf-8'), allow_unicode=True)
+    common.run(["mihomo", "convert-ruleset", "domain", "yaml", yaml_path, mrs_path])
+    return True
+
+
+def build_ipcidr_mrs(filtered, name, output_dir):
+    ip_lines = sorted(filtered.get('ip_cidr', set()))
+    if not ip_lines:
+        return False
+    yaml_path = os.path.join(output_dir, f"{name}.yaml")
+    mrs_path = os.path.join(output_dir, f"{name}.mrs")
+    common.yaml.safe_dump({'payload': ip_lines}, open(yaml_path, 'w', encoding='utf-8'), allow_unicode=True)
+    common.run(["mihomo", "convert-ruleset", "ipcidr", "yaml", yaml_path, mrs_path])
+    return True
+
+
+def build_one(name_link, work_dir, output_dir, keep_fields, category_label):
+    custom_name, link = name_link
     try:
-        name, unified = common.link_to_unified(link, work_dir)
+        name, unified = common.link_to_unified(link, work_dir, custom_name)
 
         if unified == 'UNSUPPORTED':
             print(f"[跳过] {link}：mihomo 官方未提供 mrs 反解工具，无法作为规则源导入")
@@ -26,46 +58,38 @@ def build_one(link, work_dir):
             print(f"[跳过] {link}：未解析出任何规则")
             return
 
-        unsupported = set(unified.keys()) - common.MIHOMO_MRS_SUPPORTED
-        if unsupported:
-            print(f"[提示] {name}: 以下规则类型 mihomo mrs 不支持，已跳过: {sorted(unsupported)}")
+        filtered, dropped = common.filter_unified(unified, keep_fields)
+        if dropped:
+            print(f"[提示] {name} ({category_label}): 忽略了不属于此分类的字段 {dropped}，"
+                  f"如需保留请把此链接也加进对应的 links-*.txt")
 
-        domain_lines = sorted(unified.get('domain', set()))
-        domain_lines += sorted('+.' + d.lstrip('.') for d in unified.get('domain_suffix', set()))
-        ip_lines = sorted(unified.get('ip_cidr', set()))
+        mrs_unsupported = set(filtered.keys()) - common.MIHOMO_MRS_SUPPORTED
+        if mrs_unsupported:
+            print(f"[提示] {name} ({category_label}): 以下字段 mihomo mrs 不支持，已跳过: {sorted(mrs_unsupported)}")
 
-        produced = False
-
-        if domain_lines:
-            yaml_path = os.path.join(OUTPUT_DIR, f"{name}.yaml")
-            mrs_path = os.path.join(OUTPUT_DIR, f"{name}.mrs")
-            common.yaml.safe_dump({'payload': domain_lines}, open(yaml_path, 'w', encoding='utf-8'),
-                                   allow_unicode=True)
-            common.run(["mihomo", "convert-ruleset", "domain", "yaml", yaml_path, mrs_path])
-            produced = True
-
-        if ip_lines:
-            yaml_path_ip = os.path.join(OUTPUT_DIR, f"{name}-ip.yaml")
-            mrs_path_ip = os.path.join(OUTPUT_DIR, f"{name}-ip.mrs")
-            common.yaml.safe_dump({'payload': ip_lines}, open(yaml_path_ip, 'w', encoding='utf-8'),
-                                   allow_unicode=True)
-            common.run(["mihomo", "convert-ruleset", "ipcidr", "yaml", yaml_path_ip, mrs_path_ip])
-            produced = True
+        if category_label == "domain":
+            produced = build_domain_mrs(filtered, name, output_dir)
+        else:
+            produced = build_ipcidr_mrs(filtered, name, output_dir)
 
         if produced:
-            print(f"[完成] {link} -> mihomo/{name}.mrs")
+            print(f"[完成] {link} -> mihomo/{category_label}/{name}.mrs")
         else:
-            print(f"[跳过] {link}：没有 domain/domain_suffix/ip_cidr，未生成 mrs")
+            print(f"[跳过] {link}：过滤后没有可生成 mrs 的规则")
     except Exception as e:
         print(f"[出错] {link} 处理失败，已跳过，原因：{e}")
 
 
 def main():
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    links = common.read_links("../links.txt")
     with tempfile.TemporaryDirectory() as work_dir:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            list(executor.map(lambda l: build_one(l, work_dir), links))
+        for links_path, output_dir, keep_fields, category_label in CATEGORIES:
+            os.makedirs(output_dir, exist_ok=True)
+            links = common.read_links(links_path)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+                list(executor.map(
+                    lambda nl: build_one(nl, work_dir, output_dir, keep_fields, category_label),
+                    links
+                ))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,12 @@
 """
-只负责生成 sing-box 格式 (json + srs)，写入 rule/singbox/。
+只负责生成 sing-box 格式 (json + srs)，写入 rule/singbox/domain/ 和 rule/singbox/ipcidr/。
 由 .github/workflows/srs.yml 独立触发运行，不涉及 mihomo。
+
+- ../links-domain.txt  里的链接只提取 domain/domain_suffix/domain_keyword/domain_regex
+  -> 写到 singbox/domain/
+- ../links-ipcidr.txt  里的链接只提取 ip_cidr/source_ip_cidr
+  -> 写到 singbox/ipcidr/
+一条链接如果混了两类规则，放进哪个文件就只取对应那部分，另一部分会被忽略并打印提示。
 """
 import os
 import concurrent.futures
@@ -8,12 +14,16 @@ import tempfile
 
 import common
 
-OUTPUT_DIR = "./singbox"
+CATEGORIES = [
+    ("../links-domain.txt", "./singbox/domain", common.DOMAIN_FIELDS, "domain"),
+    ("../links-ipcidr.txt", "./singbox/ipcidr", common.IPCIDR_FIELDS, "ipcidr"),
+]
 
 
-def build_one(link, work_dir):
+def build_one(name_link, work_dir, output_dir, keep_fields, category_label):
+    custom_name, link = name_link
     try:
-        name, unified = common.link_to_unified(link, work_dir)
+        name, unified = common.link_to_unified(link, work_dir, custom_name)
 
         if unified == 'UNSUPPORTED':
             print(f"[跳过] {link}：mihomo 官方未提供 mrs 反解工具，srs.yml 无法处理此输入")
@@ -22,21 +32,33 @@ def build_one(link, work_dir):
             print(f"[跳过] {link}：未解析出任何规则")
             return
 
-        json_path = os.path.join(OUTPUT_DIR, f"{name}.json")
-        srs_path = os.path.join(OUTPUT_DIR, f"{name}.srs")
-        common.unified_to_singbox_json(unified, json_path)
+        filtered, dropped = common.filter_unified(unified, keep_fields)
+        if dropped:
+            print(f"[提示] {name} ({category_label}): 忽略了不属于此分类的字段 {dropped}，"
+                  f"如需保留请把此链接也加进对应的 links-*.txt")
+        if not filtered:
+            print(f"[跳过] {link}：过滤后没有属于 {category_label} 分类的规则")
+            return
+
+        json_path = os.path.join(output_dir, f"{name}.json")
+        srs_path = os.path.join(output_dir, f"{name}.srs")
+        common.unified_to_singbox_json(filtered, json_path)
         common.run(["sing-box", "rule-set", "compile", "--output", srs_path, json_path])
-        print(f"[完成] {link} -> singbox/{name}.json + .srs")
+        print(f"[完成] {link} -> singbox/{category_label}/{name}.json + .srs")
     except Exception as e:
         print(f"[出错] {link} 处理失败，已跳过，原因：{e}")
 
 
 def main():
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    links = common.read_links("../links.txt")
     with tempfile.TemporaryDirectory() as work_dir:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            list(executor.map(lambda l: build_one(l, work_dir), links))
+        for links_path, output_dir, keep_fields, category_label in CATEGORIES:
+            os.makedirs(output_dir, exist_ok=True)
+            links = common.read_links(links_path)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+                list(executor.map(
+                    lambda nl: build_one(nl, work_dir, output_dir, keep_fields, category_label),
+                    links
+                ))
 
 
 if __name__ == '__main__':

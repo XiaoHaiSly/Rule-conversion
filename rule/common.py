@@ -29,6 +29,17 @@ MAP_DICT = {'DOMAIN-SUFFIX': 'domain_suffix', 'HOST-SUFFIX': 'domain_suffix', 'h
 # mihomo mrs 目前只支持这两种 behavior，其余类型只能留在 srs/json 里
 MIHOMO_MRS_SUPPORTED = {'domain', 'domain_suffix', 'ip_cidr'}
 
+# links-domain.txt / links-ipcidr.txt 分类过滤用
+DOMAIN_FIELDS = {'domain', 'domain_suffix', 'domain_keyword', 'domain_regex'}
+IPCIDR_FIELDS = {'ip_cidr', 'source_ip_cidr'}
+
+
+def filter_unified(unified, keep_fields):
+    """只保留 keep_fields 里的字段，返回 (filtered, dropped_fields)"""
+    filtered = {k: v for k, v in unified.items() if k in keep_fields}
+    dropped = sorted(set(unified.keys()) - keep_fields)
+    return filtered, dropped
+
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
 
@@ -64,9 +75,34 @@ def base_name(link):
 
 
 def read_links(links_path="../links.txt"):
+    """
+    每行格式:  [自定义名字 ]<链接>
+    - 不写名字: 输出文件名自动从链接 URL 取 (去掉协议前缀和扩展名)
+    - 写了名字: 名字和链接之间用空格分隔，名字优先，例如:
+        WeChatCustom https://raw.githubusercontent.com/.../WeChat.list
+        MyAds adguard:https://example.com/ads.txt
+    返回 [(custom_name_or_None, link), ...]
+    文件不存在时返回空列表（不报错），方便某个分类暂时没有链接的情况。
+    """
+    if not os.path.exists(links_path):
+        print(f"[提示] {links_path} 不存在，跳过")
+        return []
+
     with open(links_path, 'r', encoding='utf-8') as f:
-        links = f.read().splitlines()
-    return [l.strip() for l in links if l.strip() and not l.strip().startswith('#')]
+        raw_lines = f.read().splitlines()
+
+    results = []
+    for line in raw_lines:
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        parts = line.split(None, 1)  # 按任意空白切一刀，最多切一次
+        if len(parts) == 2 and ('://' in parts[1]):
+            # 第一段不含 :// ，且第二段像链接 -> 第一段是自定义名字
+            results.append((parts[0], parts[1].strip()))
+        else:
+            results.append((None, line))
+    return results
 
 
 def download_to_file(url, path):
@@ -213,11 +249,11 @@ def adguard_url_to_unified(url, work_dir, name):
     return singbox_json_to_unified(json_path)
 
 
-def link_to_unified(link, work_dir):
+def link_to_unified(link, work_dir, custom_name=None):
     """把一条 link 解析成 (name, unified) 或 (name, None)。
     kind == 'mrs' 时返回 (name, 'UNSUPPORTED')，调用方据此打印跳过信息。"""
     kind, url = detect_source(link)
-    name = base_name(url)
+    name = custom_name or base_name(url)
 
     if kind == 'mrs':
         return name, 'UNSUPPORTED'
