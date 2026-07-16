@@ -1,13 +1,3 @@
-"""
-只负责生成 sing-box 格式 (json + srs)，写入 rule/singbox/domain/ 和 rule/singbox/ipcidr/。
-由 .github/workflows/srs.yml 独立触发运行，不涉及 mihomo。
-
-- ../links-domain.txt  里的链接只提取 domain/domain_suffix/domain_keyword/domain_regex
-  -> 写到 singbox/domain/
-- ../links-ipcidr.txt  里的链接只提取 ip_cidr/source_ip_cidr
-  -> 写到 singbox/ipcidr/
-一条链接如果混了两类规则，放进哪个文件就只取对应那部分，另一部分会被忽略并打印提示。
-"""
 import os
 import concurrent.futures
 import tempfile
