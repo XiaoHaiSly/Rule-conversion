@@ -1,22 +1,8 @@
-"""
-扫描 rule/singbox 和 rule/mihomo，为每一级目录各生成一个 index.html，
-浏览体验跟 GitHub 网页版目录一致：
-
-  rule/index.html                 -> 显示 singbox/ mihomo/ 两个文件夹
-  rule/singbox/index.html         -> 显示 domain/ ipcidr/ 两个文件夹
-  rule/singbox/domain/index.html  -> 显示该目录下的具体文件
-  rule/singbox/ipcidr/index.html  -> 同上
-  rule/mihomo/index.html          -> 显示 domain/ ipcidr/
-  rule/mihomo/domain/index.html   -> 显示该目录下的具体文件
-  rule/mihomo/ipcidr/index.html   -> 同上
-
-由 .github/workflows/deploy-pages.yml 在部署前调用，不需要手动运行。
-"""
 import os
 import html as html_lib
 from datetime import datetime, timezone
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # rule/
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 TREE = {
     "singbox": ["domain", "ipcidr"],
@@ -29,6 +15,7 @@ COPY_ICON_SVG = (
     '<rect x="9" y="9" width="13" height="13" rx="2"></rect>'
     '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>'
 )
+
 FOLDER_ICON_SVG = (
     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
     'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
@@ -107,7 +94,6 @@ STYLE = '''
   .ftype { color: var(--muted); }
   .fsize { color: var(--muted); text-align: right; }
   .op { text-align: right; width: 44px; padding-right: 14px !important; }
-  .empty { color: var(--muted); font-size: 13px; padding: 18px; margin: 0; text-align: center; }
 
   .copy-btn {
     background: transparent; border: 1px solid var(--border); color: var(--muted);
@@ -161,9 +147,8 @@ def collect_files(folder):
 
 
 def breadcrumb_html(parts):
-    """parts: [(label, href_or_None)]，最后一个是当前页不加链接"""
     segs = []
-    for i, (label, href) in enumerate(parts):
+    for label, href in parts:
         if href:
             segs.append(f'<a href="{href}">{label}</a>')
         else:
@@ -183,10 +168,10 @@ def page_shell(title, crumb, body):
 </head>
 <body>
 <div class="wrap">
-  {crumb}
-  <h1>{title}</h1>
-  {body}
-  <footer>由 rule/generate_index.py 自动生成</footer>
+{crumb}
+<h1>{title}</h1>
+{body}
+<footer>由 rule/generate_index.py 自动生成</footer>
 </div>
 <script>{SCRIPT}</script>
 </body>
@@ -194,46 +179,48 @@ def page_shell(title, crumb, body):
 
 
 def render_folder_page(title, crumb, folders):
-    """folders: [(name, href, count, cls)]"""
     cards = []
     for name, href, count, cls in folders:
         cards.append(f'''
-      <a class="folder-card {cls}" href="{href}">
-        <span class="icon">{FOLDER_ICON_SVG}</span>
-        <span class="name">{name}/</span>
-        <span class="meta">{count} 个文件</span>
-      </a>''')
-    body = f'<div class="folder-grid">{"".join(cards)}</div>'
-    return page_shell(title, crumb, body)
+<a class="folder-card {cls}" href="{href}">
+<span class="icon">{FOLDER_ICON_SVG}</span>
+<span class="name">{name}/</span>
+<span class="meta">{count} 个文件</span>
+</a>''')
+    return page_shell(title, crumb, f'<div class="folder-grid">{"".join(cards)}</div>')
 
 
 def render_file_page(title, crumb, rel_dir, entries):
     if not entries:
-        table_html = '<p class="empty">-- 这里还没有文件，先跑一次对应的 build workflow --</p>'
+        table_html = '<p class="empty">-- 这里还没有文件，先运行构建任务 --</p>'
     else:
         rows = []
         for fname, size in entries:
             ext = fname.rsplit('.', 1)[-1] if '.' in fname else ''
             relpath = f"{rel_dir}/{fname}"
-            esc_path = html_lib.escape(relpath)
             rows.append(f'''
-              <tr>
-                <td class="fname-cell"><a class="fname" href="{fname}">{html_lib.escape(fname)}</a></td>
-                <td class="ftype">.{ext}</td>
-                <td class="fsize">{human_size(size)}</td>
-                <td class="op"><button class="copy-btn" data-path="{esc_path}" title="复制链接" onclick="copyLink(this)">{COPY_ICON_SVG}</button></td>
-              </tr>''')
+<tr>
+<td class="fname-cell"><a class="fname" href="{fname}">{html_lib.escape(fname)}</a></td>
+<td class="ftype">.{ext}</td>
+<td class="fsize">{human_size(size)}</td>
+<td class="op"><button class="copy-btn" data-path="{html_lib.escape(relpath)}" onclick="copyLink(this)">{COPY_ICON_SVG}</button></td>
+</tr>''')
+
         table_html = f'''
-        <div class="table-card">
-          <div class="table-scroll">
-            <table>
-              <thead><tr><th>文件</th><th>类型</th><th>大小</th><th></th></tr></thead>
-              <tbody>{''.join(rows)}</tbody>
-            </table>
-          </div>
-        </div>'''
-    stats = f'<div class="stats"><span><b>{len(entries)}</b> 个文件</span></div>'
-    return page_shell(title, crumb, stats + table_html)
+<div class="table-card">
+<div class="table-scroll">
+<table>
+<thead><tr><th>文件</th><th>类型</th><th>大小</th><th></th></tr></thead>
+<tbody>{"".join(rows)}</tbody>
+</table>
+</div>
+</div>'''
+
+    return page_shell(
+        title,
+        crumb,
+        f'<div class="stats"><span><b>{len(entries)}</b> 个文件</span></div>{table_html}'
+    )
 
 
 def write(path, content):
@@ -246,35 +233,48 @@ def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     total_files = 0
 
-    # 根页面: rule/index.html -> singbox/ mihomo/
     root_folders = []
     for top, subs in TREE.items():
         cls = "sb" if top == "singbox" else "mh"
         count = sum(len(collect_files(os.path.join(BASE_DIR, top, sub))) for sub in subs)
         root_folders.append((top, f"{top}/", count, cls))
-    root_crumb = breadcrumb_html([("Rule Feed", None)])
-    write(os.path.join(BASE_DIR, "index.html"),
-          render_folder_page("Rule Feed", root_crumb, root_folders))
 
-    # 二级页面: rule/singbox/index.html, rule/mihomo/index.html -> domain/ ipcidr/
+    write(
+        os.path.join(BASE_DIR, "index.html"),
+        render_folder_page("Rule Feed", breadcrumb_html([("Rule Feed", None)]), root_folders)
+    )
+
     for top, subs in TREE.items():
         cls = "sb" if top == "singbox" else "mh"
+
         sub_folders = []
         for sub in subs:
             count = len(collect_files(os.path.join(BASE_DIR, top, sub)))
             sub_folders.append((sub, f"{sub}/", count, cls))
-        crumb = breadcrumb_html([("Rule Feed", "/"), (top, None)])
-        write(os.path.join(BASE_DIR, top, "index.html"),
-              render_folder_page(top, crumb, sub_folders))
 
-        # 三级页面: rule/singbox/domain/index.html 等 -> 具体文件
+        write(
+            os.path.join(BASE_DIR, top, "index.html"),
+            render_folder_page(top, breadcrumb_html([("Rule Feed", "/"), (top, None)]), sub_folders)
+        )
+
         for sub in subs:
             folder = os.path.join(BASE_DIR, top, sub)
             entries = collect_files(folder)
             total_files += len(entries)
-            crumb = breadcrumb_html([("Rule Feed", "/"), (top, f"/{top}/"), (sub, None)])
-            write(os.path.join(folder, "index.html"),
-                  render_file_page(f"{top}/{sub}", crumb, f"{top}/{sub}", entries))
+
+            write(
+                os.path.join(folder, "index.html"),
+                render_file_page(
+                    f"{top}/{sub}",
+                    breadcrumb_html([
+                        ("Rule Feed", "/"),
+                        (top, f"/{top}/"),
+                        (sub, None)
+                    ]),
+                    f"{top}/{sub}",
+                    entries
+                )
+            )
 
     print(f"生成完毕，共 {total_files} 个文件，构建时间 {now}")
 
