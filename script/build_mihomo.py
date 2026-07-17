@@ -4,16 +4,21 @@ import tempfile
 
 import common
 
-# 三个来源统一处理：每条链接不论写在哪个文件里，都会按自身实际包含的
-# 字段自动拆成 domain / ip 两部分，分别写入 mihomo/<name>/ 下
-LINKS_FILES = [
+# 手动维护的规则源（links-domain / links-ipcidr / links-mixed）
+# 输出到 rules/mihomo
+RULES_LINKS_FILES = [
     "../links/links-domain.txt",
     "../links/links-ipcidr.txt",
     "../links/links-mixed.txt",
+]
+RULES_OUTPUT_ROOT = "../rules/mihomo"
+
+# 自动从 MetaCubeX/meta-rules-dat 拉取的全量 geosite+geoip（links-meta.txt）
+# 输出到 geo-data/mihomo，与手动维护的规则分开存放
+GEO_LINKS_FILES = [
     "../links/links-meta.txt",
 ]
-
-OUTPUT_ROOT = "../rule/mihomo"
+GEO_OUTPUT_ROOT = "../geo-data/mihomo"
 
 
 def build_domain_files(filtered, name, out_dir):
@@ -41,7 +46,7 @@ def build_ip_files(filtered, name, out_dir):
     return True
 
 
-def build_one(name_link, work_dir):
+def build_one(name_link, work_dir, output_root):
     custom_name, link = name_link
     try:
         name, unified = common.link_to_unified(link, work_dir, custom_name)
@@ -61,7 +66,7 @@ def build_one(name_link, work_dir):
         if mrs_unsupported:
             print(f"[提示] {name}: 以下字段 mihomo mrs 不支持，已跳过: {sorted(mrs_unsupported)}")
 
-        out_dir = os.path.join(OUTPUT_ROOT, name)
+        out_dir = os.path.join(output_root, name)
         wrote = []
         if build_domain_files(domain_part, name, out_dir):
             wrote.append("Domain")
@@ -69,23 +74,27 @@ def build_one(name_link, work_dir):
             wrote.append("IP")
 
         if wrote:
-            print(f"[完成] {link} -> mihomo/{name}/ ({','.join(wrote)})")
+            print(f"[完成] {link} -> {output_root}/{name}/ ({','.join(wrote)})")
         else:
             print(f"[跳过] {link}：过滤后没有可生成 mrs 的规则")
     except Exception as e:
         print(f"[出错] {link} 处理失败，已跳过，原因：{e}")
 
 
+def run_group(links_files, output_root, work_dir):
+    os.makedirs(output_root, exist_ok=True)
+    all_links = []
+    for links_path in links_files:
+        all_links.extend(common.read_links(links_path))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(lambda nl: build_one(nl, work_dir, output_root), all_links))
+
+
 def main():
     with tempfile.TemporaryDirectory() as work_dir:
-        os.makedirs(OUTPUT_ROOT, exist_ok=True)
-
-        all_links = []
-        for links_path in LINKS_FILES:
-            all_links.extend(common.read_links(links_path))
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            list(executor.map(lambda nl: build_one(nl, work_dir), all_links))
+        run_group(RULES_LINKS_FILES, RULES_OUTPUT_ROOT, work_dir)
+        run_group(GEO_LINKS_FILES, GEO_OUTPUT_ROOT, work_dir)
 
 
 if __name__ == '__main__':
