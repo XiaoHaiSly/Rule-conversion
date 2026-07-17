@@ -12,14 +12,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # workflow_run 触发时，只在被监听的那个 workflow 跑成功了才继续；
-    # 手动点 workflow_dispatch 触发时没有 workflow_run 上下文，直接放行
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - uses: actions/checkout@v2
       with:
-        # 跟着触发本次的那次 build 的 commit 走，保证发布的是最新构建出的文件
         ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
     - name: Set up Python3
