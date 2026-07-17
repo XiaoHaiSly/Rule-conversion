@@ -1,18 +1,3 @@
-"""
-只负责生成 mihomo 格式 (yaml + mrs)，写入 rule/mihomo/domain/ 和 rule/mihomo/ipcidr/。
-由 .github/workflows/mrs.yml 独立触发运行。
-
-- ../links-domain.txt  只提取 domain/domain_suffix (domain_keyword/domain_regex 仍不被 mrs 支持)
-  -> 写到 mihomo/domain/
-- ../links-ipcidr.txt  只提取 ip_cidr (source_ip_cidr 不被 mrs 支持)
-  -> 写到 mihomo/ipcidr/
-- ../links-mixed.txt   不预设类型，自动检测：纯域名只写 domain/，纯IP只写 ipcidr/，
-  两者都有就两边各写一份。
-
-注意：如果 links-*.txt 里有 srs:/adguard: 类型的输入，这里依然需要调用
-sing-box 做 decompile/convert 拿到中间格式，所以 mrs.yml 里也会装 sing-box，
-但绝不会往 rule/singbox/ 写任何文件。
-"""
 import os
 import concurrent.futures
 import tempfile
@@ -66,8 +51,7 @@ def build_one(name_link, work_dir, output_dir, keep_fields, category_label):
 
         filtered, dropped = common.filter_unified(unified, keep_fields)
         if dropped:
-            print(f"[提示] {name} ({category_label}): 忽略了不属于此分类的字段 {dropped}，"
-                  f"如需保留请把此链接也加进对应的 links-*.txt")
+            print(f"[提示] {name} ({category_label}): 忽略了不属于此分类的字段 {dropped}，如需保留请把此链接也加进对应的 links-*.txt")
 
         mrs_unsupported = set(filtered.keys()) - common.MIHOMO_MRS_SUPPORTED
         if mrs_unsupported:
