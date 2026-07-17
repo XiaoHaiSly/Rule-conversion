@@ -3,7 +3,7 @@ import requests
 
 REPO = "MetaCubeX/meta-rules-dat"
 BRANCH = "meta"
-DIRS = ("geo/geosite/", "geo/geoip/")
+TARGET_DIRS = ("geosite", "geoip")
 
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "..", "links", "links-meta.txt")
 
@@ -20,44 +20,54 @@ def get_branch_sha():
     return resp.json()["commit"]["sha"]
 
 
-def list_all_files():
-    """用 Git Trees API（recursive=1）一次性拿整棵树，避免 Contents API 对大目录的截断问题。"""
-    sha = get_branch_sha()
-    url = f"https://api.github.com/repos/{REPO}/git/trees/{sha}?recursive=1"
+def get_tree(sha):
+    """非递归拿某一层目录的直接内容，不会有整仓库那种截断问题。"""
+    url = f"https://api.github.com/repos/{REPO}/git/trees/{sha}"
     resp = requests.get(url, headers=HEADERS, timeout=60)
     resp.raise_for_status()
     data = resp.json()
     if data.get("truncated"):
-        print("[警告] GitHub 返回的目录树仍被截断了（超过单次树接口上限），部分文件可能抓不全")
+        print(f"[警告] {url} 返回仍被截断了")
     return data.get("tree", [])
 
 
+def find_child_sha(tree_items, name):
+    for item in tree_items:
+        if item.get("path") == name and item.get("type") == "tree":
+            return item.get("sha")
+    return None
+
+
 def main():
-    tree = list_all_files()
+    branch_sha = get_branch_sha()
+    root_tree = get_tree(branch_sha)
+
+    geo_sha = find_child_sha(root_tree, "geo")
+    if not geo_sha:
+        raise RuntimeError("仓库根目录下没找到 geo 目录，仓库结构可能变了，需要人工检查")
+
+    geo_tree = get_tree(geo_sha)
 
     lines = []
-    counts = {d: 0 for d in DIRS}
-    for item in tree:
-        if item.get("type") != "blob":
+    for dirname in TARGET_DIRS:
+        sub_sha = find_child_sha(geo_tree, dirname)
+        if not sub_sha:
+            print(f"[警告] geo/{dirname} 目录没找到")
             continue
-        path = item.get("path", "")
-        for d in DIRS:
-            if not path.startswith(d):
-                continue
-            rest = path[len(d):]
-            if "/" in rest:
-                # 子目录里的文件不要
-                continue
-            if not rest.lower().endswith((".yaml", ".yml")):
-                continue
-            name = rest.rsplit(".", 1)[0]
-            raw_url = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/{path}"
-            lines.append(f"{name} {raw_url}")
-            counts[d] += 1
-            break
 
-    for d, c in counts.items():
-        print(f"[{d}] 发现 {c} 个 yaml 文件")
+        sub_tree = get_tree(sub_sha)
+        cnt = 0
+        for item in sub_tree:
+            if item.get("type") != "blob":
+                continue
+            fname = item.get("path", "")
+            if not fname.lower().endswith((".yaml", ".yml")):
+                continue
+            name = fname.rsplit(".", 1)[0]
+            raw_url = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/geo/{dirname}/{fname}"
+            lines.append(f"{name} {raw_url}")
+            cnt += 1
+        print(f"[geo/{dirname}] 发现 {cnt} 个 yaml 文件")
 
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
