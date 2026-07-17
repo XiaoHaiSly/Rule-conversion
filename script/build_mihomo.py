@@ -82,6 +82,8 @@ def build_group(name, links, work_dir, output_root):
         if not unified:
             print(f"[跳过] {link}：未解析出任何规则")
             continue
+        if name in ('google', 'twitter'):
+            print(f"[调试] {name} <- {link} 解析出字段: { {k: len(v) for k, v in unified.items()} }")
         unified_list.append(unified)
 
     if not unified_list:
@@ -112,6 +114,13 @@ def build_group(name, links, work_dir, output_root):
 def run_group(links_files, output_root, work_dir):
     os.makedirs(output_root, exist_ok=True)
     groups = group_links(links_files)
+
+    multi = {name: len(links) for name, links in groups.items() if len(links) > 1}
+    print(f"[分组统计] {output_root}: 共 {len(groups)} 个 name，其中 {len(multi)} 个有多个来源")
+    if 'google' in groups:
+        print(f"[分组统计] google 的来源: {groups['google']}")
+    if 'twitter' in groups:
+        print(f"[分组统计] twitter 的来源: {groups['twitter']}")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         list(executor.map(
