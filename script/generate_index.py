@@ -2,6 +2,12 @@ import os
 import html as html_lib
 from datetime import datetime, timezone
 
+try:
+    import markdown as md_lib
+    HAS_MARKDOWN = True
+except ImportError:
+    HAS_MARKDOWN = False
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 
@@ -10,6 +16,7 @@ HIDDEN_ALWAYS = {'.git'}
 EXCLUDE_DIRS = {'__pycache__', 'node_modules'}
 EXCLUDE_FILES = {'index.html'}
 EXCLUDE_FILE_EXTS = set()
+MD_EXTS = ('.md', '.markdown')
 
 COPY_ICON_SVG = (
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
@@ -132,6 +139,51 @@ def human_size(n):
     return f"{n:.1f}TB"
 
 
+def render_markdown_preview(src_path, title):
+    try:
+        with open(src_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+    except Exception:
+        return None
+
+    if HAS_MARKDOWN:
+        body_html = md_lib.markdown(
+            text, extensions=['fenced_code', 'tables', 'toc', 'sane_lists']
+        )
+    else:
+        body_html = f'<pre style="white-space:pre-wrap;">{html_lib.escape(text)}</pre>'
+
+    return f'''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{html_lib.escape(title)}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown-light.min.css">
+<style>
+  body {{
+    margin: 0; background: #f7f8fa; padding: 24px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }}
+  .back {{ max-width: 780px; margin: 0 auto 14px; font-size: 13px; }}
+  .back a {{ color: #3562e0; text-decoration: none; }}
+  .back a:hover {{ text-decoration: underline; }}
+  .markdown-body {{
+    max-width: 780px; margin: 0 auto; background: #fff; border: 1px solid #e6e8ee;
+    border-radius: 12px; padding: 32px; box-sizing: border-box;
+  }}
+  @media (max-width: 600px) {{ .markdown-body {{ padding: 20px; }} }}
+</style>
+</head>
+<body>
+<div class="back"><a href="./">← 返回上级目录</a></div>
+<article class="markdown-body">
+{body_html}
+</article>
+</body>
+</html>'''
+
+
 def collect_entries(dir_path):
     dirs, files = [], []
     if not os.path.isdir(dir_path):
@@ -148,6 +200,9 @@ def collect_entries(dir_path):
             if name in EXCLUDE_FILES:
                 continue
             if os.path.splitext(name)[1].lower() in EXCLUDE_FILE_EXTS:
+                continue
+            if name.lower().endswith(tuple(ext + '.html' for ext in MD_EXTS)):
+                # 这是 md 文件自动生成的渲染预览页，不单独列出来
                 continue
             files.append((name, os.path.getsize(full)))
     return dirs, files
@@ -221,9 +276,11 @@ def render_dir(dir_path, rel_parts):
         for fname, size in files:
             ext = fname.rsplit('.', 1)[-1] if '.' in fname else ''
             relpath = f"{rel_dir}/{fname}" if rel_dir else fname
+            is_md = fname.lower().endswith(MD_EXTS)
+            open_href = f"{html_lib.escape(fname)}.html" if is_md else html_lib.escape(fname)
             rows.append(f'''
 <tr>
-<td class="fname-cell"><a class="fname" href="{html_lib.escape(fname)}">{html_lib.escape(fname)}</a></td>
+<td class="fname-cell"><a class="fname" href="{open_href}">{html_lib.escape(fname)}</a></td>
 <td class="ftype">.{ext}</td>
 <td class="fsize">{human_size(size)}</td>
 <td class="op"><button class="copy-btn" data-path="{html_lib.escape(relpath)}" onclick="copyLink(this)">{COPY_ICON_SVG}</button></td>
@@ -243,6 +300,12 @@ def render_dir(dir_path, rel_parts):
         body_parts.append('<p class="empty">-- 这里还没有文件，先运行构建任务 --</p>')
 
     write(os.path.join(dir_path, "index.html"), page_shell(title, crumb, "".join(body_parts)))
+
+    for fname, _size in files:
+        if fname.lower().endswith(MD_EXTS):
+            preview_html = render_markdown_preview(os.path.join(dir_path, fname), fname)
+            if preview_html:
+                write(os.path.join(dir_path, f"{fname}.html"), preview_html)
 
     for d in dirs:
         render_dir(os.path.join(dir_path, d), rel_parts + [d])
