@@ -1,0 +1,174 @@
+UA_T: &UA_T {type: http, interval: 86400, proxy: DIRECT, header: {User-Agent: ["clash-verge/v2.4.7"]}}
+proxy-providers:
+  Sub_1:
+    <<: *UA_T
+    url: "订阅链接"
+    path: ./providers/Sub_1.yaml
+
+SUBS: &SUBS [Sub_1]
+
+HEALTH_CHECK: &HEALTH_CHECK 
+  {enable: true, interval: 300, lazy: false, url: 'https://www.gstatic.com/generate_204', tolerance: 80, timeout: 5000}
+
+SELECT_T: &SELECT_T {type: select, use: *SUBS, <<: *HEALTH_CHECK}  
+
+AUTO_T: &AUTO_T {type: url-test, use: *SUBS, <<: *HEALTH_CHECK, hidden: true}
+
+FALLBACK_T: &FALLBACK_T {type: fallback, use: *SUBS, <<: *HEALTH_CHECK, hidden: true}
+
+OT_T: &OT_T '^(?i)(?!.*(香港|Hong Kong|Taiwan|台湾|TW|Japan|日本|JP|Singapore|新加坡|SG|America|美国|US|Korea|韩国|KR|UK|英国|United Kingdom|France|法国|\bFR\b|Germany|德国|DE|Netherlands|荷兰|NL|𝑺𝒕𝒂𝒄𝒌|𝑭𝒊𝒓𝒔𝒕|群|官网|流量|剩余|频道)).*$'
+
+mixed-port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+ipv6: true
+unified-delay: true
+tcp-concurrent: true
+find-process-mode: strict
+global-client-fingerprint: chrome
+keep-alive-idle: 300
+keep-alive-interval: 75
+profile:
+  store-selected: true
+  store-fake-ip: true
+geodata-mode: true
+geox-url:
+  geoip: 'https://ghfast.top/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat'
+  geosite: 'https://ghfast.top/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat'
+
+external-controller: "[::]:9090"
+external-ui: ui
+external-ui-url: "https://ghfast.top/https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip"
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.push.apple.com"
+  skip-dst-address:
+    - "rule-set:telegram_ip"
+
+tun:
+  enable: true
+  stack: system
+  dns-hijack:
+    - "udp://any:53"
+    - "tcp://any:53"
+  auto-route: true
+  auto-redirect: true
+  auto-detect-interface: true
+
+dns:
+  enable: true
+  ipv6: true
+  cache-algorithm: arc
+  listen: "[::]:1053"
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "rule-set:fakeip-filter"
+    - "rule-set:private"
+  default-nameserver:
+    - https://223.5.5.5/dns-query
+  proxy-server-nameserver:
+    - https://doh.pub/dns-query
+  nameserver:
+    #- https://dns.alidns.com/dns-query
+    #- https://dns.cloudflare.com/dns-query
+    #- https://pz.fyi/dns-query
+    - https://d.atri.ink/dns-query
+  nameserver-policy:
+    "rule-set:private,cn": ["https://dns.alidns.com/dns-query"]
+    "rule-set:global": ["https://dns.google/dns-query#𝑷𝑹𝑶𝑿𝒀"]
+    #"rule-set:global": ["https://dns.cloudflare.com/dns-query#𝑷𝑹𝑶𝑿𝒀"]
+  direct-nameserver:
+    - system
+  direct-nameserver-follow-policy: true
+
+hosts:
+  dns.alidns.com: [223.5.5.5, 223.6.6.6]
+  doh.pub: [1.12.12.21, 120.53.53.53]
+  dns.google: [8.8.8.8, 8.8.4.4]
+  dns.cloudflare.com: [1.1.1.1, 1.0.0.1]
+  mosdns.apad.pro: 117.50.76.202
+  pz.fyi: 106.54.11.55
+  d.atri.ink: 43.129.165.236
+
+proxies:
+  - name: 𝑰𝑷𝒗𝟒 𝑭𝒊𝒓𝒔𝒕
+    type: direct
+    ip-version: ipv4-prefer
+  - name: 𝑰𝑷𝒗𝟔 𝑭𝒊𝒓𝒔𝒕
+    type: direct
+    ip-version: ipv6-prefer
+  - name: 𝑫𝒖𝒂𝒍 𝑺𝒕𝒂𝒄𝒌
+    type: direct
+
+proxy-groups:
+- {name: GLOBAL, type: select, <<: *HEALTH_CHECK, proxies: [𝑯𝑲 𝑵𝒐𝒅𝒆, 𝑱𝑷 𝑵𝒐𝒅𝒆, 𝑺𝑮 𝑵𝒐𝒅𝒆, 𝑼𝑺 𝑵𝒐𝒅𝒆, 𝑬𝑼 𝑵𝒐𝒅𝒆, 𝑶𝑻 𝑵𝒐𝒅𝒆, 𝑨𝑰-𝑶𝒏𝒍𝒚, 𝑻𝒆𝒍𝒆𝒈𝒓𝒂𝒎, 𝑷𝑹𝑶𝑿𝒀, 𝑪𝑯𝑰𝑵𝑨], icon: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/icon/qure/color/Area.png"}
+- {name: 𝑯𝑲 𝑵𝒐𝒅𝒆, <<: *SELECT_T, filter: '(?i)港|HK|Hong Kong', proxies: [𝑯𝑲-𝑨𝑼𝑻𝑶, 𝑯𝑲-𝑭𝑨𝑳𝑳], icon: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/icon/color/hk.png}
+- {name: 𝑱𝑷 𝑵𝒐𝒅𝒆, <<: *SELECT_T, filter: '(?i)日本|东京|大阪|JP|Japan', proxies: [𝑱𝑷-𝑨𝑼𝑻𝑶, 𝑱𝑷-𝑭𝑨𝑳𝑳], icon: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/icon/color/jp.png}
+- {name: 𝑺𝑮 𝑵𝒐𝒅𝒆, <<: *SELECT_T, filter: '(?i)新加坡|坡|SG|狮城|Singapore', proxies: [𝑺𝑮-𝑨𝑼𝑻𝑶, 𝑺𝑮-𝑭𝑨𝑳𝑳], icon: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/icon/color/sg.png}
+- {name: 𝑼𝑺 𝑵𝒐𝒅𝒆, <<: *SELECT_T, filter: '(?i)美|US|United States|America', proxies: [𝑼𝑺-𝑨𝑼𝑻𝑶, 𝑼𝑺-𝑭𝑨𝑳𝑳], icon: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/icon/color/us.png}
+- {name: 𝑬𝑼 𝑵𝒐𝒅𝒆, <<: *SELECT_T, filter: '(?i)UK|英国|United Kingdom|France|法国|\bFR\b|Germany|德国|DE|Netherlands|荷兰|NL', proxies: [𝑬𝑼-𝑨𝑼𝑻𝑶, 𝑬𝑼-𝑭𝑨𝑳𝑳], icon: https://raw.githubusercontent.com/lige47/QuanX-icon-rule/main/icon/01Country/EuropeanUnion(2).png}
+- {name: 𝑶𝑻 𝑵𝒐𝒅𝒆, <<: *SELECT_T, filter: *OT_T, proxies: [𝑶𝑻-𝑨𝑼𝑻𝑶, 𝑶𝑻-𝑭𝑨𝑳𝑳], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png}
+- {name: 𝑨𝑰-𝑶𝒏𝒍𝒚, type: select, <<: *HEALTH_CHECK, proxies: [𝑱𝑷 𝑵𝒐𝒅𝒆, 𝑺𝑮 𝑵𝒐𝒅𝒆, 𝑼𝑺 𝑵𝒐𝒅𝒆, 𝑬𝑼 𝑵𝒐𝒅𝒆, 𝑯𝑲 𝑵𝒐𝒅𝒆, 𝑶𝑻 𝑵𝒐𝒅𝒆], icon: "https://fastly.jsdelivr.net/gh/Orz-3/mini@master/Color/OpenAI.png"}
+- {name: 𝑻𝒆𝒍𝒆𝒈𝒓𝒂𝒎, type: select, <<: *HEALTH_CHECK, proxies: [𝑺𝑮 𝑵𝒐𝒅𝒆, 𝑯𝑲 𝑵𝒐𝒅𝒆, 𝑱𝑷 𝑵𝒐𝒅𝒆, 𝑼𝑺 𝑵𝒐𝒅𝒆, 𝑬𝑼 𝑵𝒐𝒅𝒆, 𝑶𝑻 𝑵𝒐𝒅𝒆], icon: "https://raw.githubusercontent.com/lige47/QuanX-icon-rule/main/icon/04ProxySoft/Telegrampremium.png"}
+- {name: 𝑷𝑹𝑶𝑿𝒀, type: select, <<: *HEALTH_CHECK, proxies: [𝑯𝑲 𝑵𝒐𝒅𝒆, 𝑱𝑷 𝑵𝒐𝒅𝒆, 𝑺𝑮 𝑵𝒐𝒅𝒆, 𝑼𝑺 𝑵𝒐𝒅𝒆, 𝑬𝑼 𝑵𝒐𝒅𝒆, 𝑶𝑻 𝑵𝒐𝒅𝒆], icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/World_Map.png}
+- {name: 𝑪𝑯𝑰𝑵𝑨, type: select, <<: *HEALTH_CHECK, proxies: [𝑰𝑷𝒗𝟒 𝑭𝒊𝒓𝒔𝒕, 𝑰𝑷𝒗𝟔 𝑭𝒊𝒓𝒔𝒕, 𝑫𝒖𝒂𝒍 𝑺𝒕𝒂𝒄𝒌, 𝑷𝑹𝑶𝑿𝒀], url: https://connectivitycheck.platform.hicloud.com/generate_204, interval: 600, lazy: false, icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/China_Map.png"}
+
+- {name: 𝑯𝑲-𝑨𝑼𝑻𝑶, <<: *AUTO_T, filter: '(?i)港|HK|Hong Kong'}
+- {name: 𝑯𝑲-𝑭𝑨𝑳𝑳, <<: *FALLBACK_T, filter: '(?i)港|HK|Hong Kong'}
+- {name: 𝑱𝑷-𝑨𝑼𝑻𝑶, <<: *AUTO_T, filter: '(?i)日本|东京|大阪|JP|Japan'}
+- {name: 𝑱𝑷-𝑭𝑨𝑳𝑳, <<: *FALLBACK_T, filter: '(?i)日本|东京|大阪|JP|Japan'}
+- {name: 𝑺𝑮-𝑨𝑼𝑻𝑶, <<: *AUTO_T, filter: '(?i)新加坡|坡|SG|狮城|Singapore'}
+- {name: 𝑺𝑮-𝑭𝑨𝑳𝑳, <<: *FALLBACK_T, filter: '(?i)新加坡|坡|SG|Singapore'}
+- {name: 𝑼𝑺-𝑨𝑼𝑻𝑶, <<: *AUTO_T, filter: '(?i)美|US|United States|America'}
+- {name: 𝑼𝑺-𝑭𝑨𝑳𝑳, <<: *FALLBACK_T, filter: '(?i)美|US|United States|America'}
+- {name: 𝑬𝑼-𝑨𝑼𝑻𝑶, <<: *AUTO_T, filter: '(?i)UK|英国|United Kingdom|France|法国|\bFR\b|Germany|德国|DE|Netherlands|荷兰|NL'}
+- {name: 𝑬𝑼-𝑭𝑨𝑳𝑳, <<: *FALLBACK_T, filter: '(?i)UK|英国|United Kingdom|France|法国|\bFR\b|Germany|德国|DE|Netherlands|荷兰|NL'}
+- {name: 𝑶𝑻-𝑨𝑼𝑻𝑶, <<: *AUTO_T, filter: *OT_T}
+- {name: 𝑶𝑻-𝑭𝑨𝑳𝑳, <<: *FALLBACK_T, filter: *OT_T}
+
+_default_mrs_domain: &d {type: http, behavior: domain, format: mrs, interval: 86400}
+_default_mrs_ip: &i {type: http, behavior: ipcidr, format: mrs, interval: 86400}
+
+rule-providers:
+  ads: {<<: *d, url: 'https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Clash.mrs', path: ./ruleset/ads.mrs}
+  stun: {<<: *d, url: 'https://testingcf.jsdelivr.net/gh/Kwisma/rules@main/rules/mihomo/STUN/STUN_Domain.mrs', path: ./ruleset/stun.mrs}
+  fakeip-filter: {<<: *d, url: 'https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/fakeip-filter.mrs', path: ./ruleset/fakeip-filter.mrs}
+  private: {<<: *d, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs', path: ./ruleset/private.mrs}
+  private_ip: {<<: *i, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/private.mrs', path: ./ruleset/private_ip.mrs}
+  global_ip: {<<: *i, url: 'https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Global/Global_OCD_IP.mrs', path: ./ruleset/global_ip.mrs}  
+  global: {<<: *d, url: 'https://cdn.jsdelivr.net/gh/GitMetaio/rule@master/rule/Clash/Global/Global_OCD_Domain.mrs', path: ./ruleset/global.mrs}
+  cn: {<<: *d, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs', path: ./ruleset/cn.mrs}
+  cn_ip: {<<: *i, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs', path: ./ruleset/cn_ip.mrs} 
+  ai: {<<: *d, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs', path: ./ruleset/ai.mrs}
+  telegram: {<<: *d, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs', path: ./ruleset/telegram.mrs}
+  telegram_ip: {<<: *i, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs', path: ./ruleset/telegram_ip.mrs}  
+
+rules: 
+  - RULE-SET,ads,REJECT
+  - RULE-SET,stun,REJECT-DROP
+  - RULE-SET,fakeip-filter,DIRECT
+  - RULE-SET,private,DIRECT
+  - RULE-SET,private_ip,DIRECT,no-resolve
+  - RULE-SET,ai,𝑨𝑰-𝑶𝒏𝒍𝒚
+  - RULE-SET,telegram,𝑻𝒆𝒍𝒆𝒈𝒓𝒂𝒎
+  - RULE-SET,telegram_ip,𝑻𝒆𝒍𝒆𝒈𝒓𝒂𝒎,no-resolve
+  - RULE-SET,global,𝑷𝑹𝑶𝑿𝒀
+  - RULE-SET,global_ip,𝑷𝑹𝑶𝑿𝒀,no-resolve
+  - RULE-SET,cn,𝑪𝑯𝑰𝑵𝑨
+  - RULE-SET,cn_ip,𝑪𝑯𝑰𝑵𝑨,no-resolve
+  - MATCH,𝑷𝑹𝑶𝑿𝒀
