@@ -1,0 +1,14 @@
+使用脚本操作 填入链接:
+
+https://raw.githubusercontent.com/mashanghai88/xiaohai/main/%E9%85%8D%E7%BD%AE%E6%A8%A1%E6%9D%BF/singbox/singbox.js#type=组合订阅&name=组合订阅&outbound=🕳ℹ️All-Auto|all-auto🕳ℹ️All-Link|all🕳ℹ️HK-Auto|hk-auto🏷ℹ️港|hk|hongkong|🇭🇰🕳ℹ️HK-Link|hk🏷ℹ️港|hk|hongkong|🇭🇰🕳ℹ️TW-Auto|tw-auto🏷ℹ️台|tw|taiwan|🇹🇼🕳ℹ️TW-Link|tw🏷ℹ️台|tw|taiwan|🇹🇼🕳ℹ️JP-Auto|jp-auto🏷ℹ️日|jp|japan|🇯🇵🕳ℹ️JP-Link|jp🏷ℹ️日|jp|japan|🇯🇵🕳ℹ️SG-Auto|sg-auto🏷ℹ️新|sg|singapore|🇸🇬🕳ℹ️SG-Link|sg🏷ℹ️新|sg|singapore|🇸🇬🕳ℹ️US-Auto|us-auto🏷ℹ️美|us|unitedstates|🇺🇸🕳ℹ️US-Link|us🏷ℹ️美|us|unitedstates|🇺🇸🕳ℹ️EU-Auto|eu-auto🏷ℹ️英|德|法|荷|俄|意|瑞|瑞典|挪|比|爱|uk|germany|france|nl|netherlands|russia|italy|switzerland|spain|🇪🇺|🇬🇧|🇩🇪|🇫🇷|🇳🇱|🇷🇺|🇮🇹|🇨🇭🕳ℹ️EU-Link|eu🏷ℹ️英|德|法|荷|俄|意|瑞|瑞典|挪|比|爱|uk|germany|france|nl|netherlands|russia|italy|switzerland|spain|🇪🇺|🇬🇧|🇩🇪|🇫🇷|🇳🇱|🇷🇺|🇮🇹|🇨🇭
+
+示例表示:
+
+读取 名称为 "机场" 的 组合订阅 中的节点(单订阅不需要设置 type 参数)
+把 所有节点插入匹配 /all|all-auto/i 的 outbound 中(跟在 🕳 后面, ℹ️ 表示忽略大小写, 不筛选节点不需要给 🏷 )
+把匹配 /港|hk|hongkong|kong kong|🇭🇰/i  (跟在 🏷 后面, ℹ️ 表示忽略大小写) 的节点插入匹配 /hk|hk-auto/i 的 outbound 中
+...
+
+🆕 也支持传入订阅 URL. 参数为 url. 记得 url 需要 encodeURIComponent. 例如: http://a.com?token=123 应使用 url=http%3A%2F%2Fa.com%3Ftoken%3D123
+
+⚠️ 如果 outbounds 为空, 自动创建 COMPATIBLE(direct) 并插入 防止报错
