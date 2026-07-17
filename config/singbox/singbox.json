@@ -174,70 +174,70 @@
         "tag": "ads_domain",
         "type": "remote",
         "format": "source",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Singbox.json",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/AWAvenue/AWAvenue_Domain.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "cn_ip",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geoip/cn.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/china/china_IP.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "cn_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo-lite/geosite/cn.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/china/china_Domain.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "google_ip",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo-lite/geoip/google.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/google/google_IP.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "google_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo-lite/geosite/google.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/google/google_Domain.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "openai_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/category-ai-!cn.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/ai/ai_Domain.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "proxy_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/geolocation-!cn.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/proxy/proxy_Domain.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "telegram_ip",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo-lite/geoip/telegram.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/telegram/telegram_IP.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "telegram_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo-lite/geosite/telegram.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/telegram/telegram_Domain.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "youtube_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://gh.445568.xyz/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo-lite/geosite/youtube.srs",
+        "url": "https://xiaohai-proxy.445568.xyz/rule/singbox/youtube/youtube_Domain.srs",
         "download_detour": "Direct"
       }
     ],
