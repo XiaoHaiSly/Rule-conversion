@@ -1,121 +1,72 @@
-# 妙妙屋 - 个人Clash订阅管理系统
+# Rule Feed
 
-一个轻量级、易使用的Clash订阅管理系统，支持 Nezha、DStatus 和 Komari 探针获取流量信息，导入外部机场节点等功能。
+一个用于抓取、转换、托管 mihomo（Clash Meta）与 sing-box 规则集的自动化项目。规则源每天自动更新，编译产物通过 Cloudflare Pages 发布，可直接在自己的代理客户端里订阅使用。
 
-## 功能特性
+CDN 地址：https://445568.xyz
 
-### 核心功能
-- 📊 流量监控 - 支持探针服务器与外部订阅流量聚合统计
-- 📈 历史流量 - 30 天流量使用趋势图表
-- 🔗 订阅链接 - 展示通过订阅管理上传或导入和生成订阅生成的订阅
-- 🔗 订阅管理 - 上传猫咪配置文件或从其他订阅url导入生成订阅
-- 🎯 生成订阅 - 从导入的节点生成订阅，可视化代理组规则编辑器
-- 📦 节点管理 - 导入个人节点或机场节点，支持添加、编辑、删除代理节点
-- 🔧 生成订阅 - 自定义规则或使用模板快速生成订阅
-- 🎨 代理分组 - 拖拽式代理节点分组配置，支持链式代理
-- 👥 用户管理 - 管理员/普通用户角色区分，订阅权限管理
-- 🌓 主题切换 - 支持亮色/暗色模式
-- 📱 响应式设计 - 不完全适配移动端和桌面端
-
-### 探针支持
-- [Nezha](https://github.com/naiba/nezha) 面板
-- [DStatus](https://github.com/DokiDoki1103/dstatus) 监控
-- [Komari](https://github.com/komari-monitor/komari) 面板
-
-### 体验[Demo](https://demo.miaomiaowu.net)  
-账户/密码: test / test123
-
-## 前置要求
-
-- OpenWrt 24.10 及更早 → 使用 `opkg`
-- OpenWrt 25.12 及更新 → 使用 `apk`
-
-两种包管理器都支持，脚本会自动识别，不用自己判断。
-
-## 特性
-
-- **新旧包管理器都支持**：同时产出传统 `opkg`（ipk）和新版 `apk`（OpenWrt 25.12+）两种包
-- **全架构覆盖**：arm64 / armv7 / armv6 / armv5 / riscv64 / x86 / amd64，一次交叉编译覆盖对应的所有具体 opkg 架构型号
-- **带 LuCI 管理界面**：`luci-app-miaomiaowu` 提供网页端配置入口
-- **签名软件源**：ipk 用 `usign` 签名，apk 用 EC 私钥签名，脚本会自动装好对应公钥
-
-## 安装 & 更新
-
-### A. 一键安装（推荐）
-
-```sh
-wget -O - https://miaomiaowu-openwrt.445568.xyz/install.sh | ash
-```
-
-自动识别 opkg 还是 apk、自动识别本机架构、装源、装包一步到位。
-
-安装完成后访问 `http://路由器IP:7852` 使用，或在 LuCI 里找到"妙妙屋"菜单项进行网页配置。
-
-### B. 添加软件源
-
-1. 添加软件源
-
-```sh
-# 只需要执行一次
-wget -O - https://miaomiaowu-openwrt.445568.xyz/feed.sh | ash
-```
-
-2. 安装
-
-```sh
-# 也可以在 LuCI 的“软件包”菜单里搜 miaomiaowu 安装
-# opkg
-opkg install miaomiaowu
-opkg install luci-app-miaomiaowu
-# apk
-apk add miaomiaowu
-apk add luci-app-miaomiaowu
-```
-
-日后有新版本，正常走 `opkg update && opkg upgrade miaomiaowu`（或 `apk update && apk upgrade`）就行，不用重新跑脚本。
-
-## 卸载
-
-```sh
-wget -O - https://miaomiaowu-openwrt.445568.xyz/uninstall.sh | ash
-```
-
-会卸载 `miaomiaowu`、`luci-app-miaomiaowu` 两个包，并删除数据目录
-
-## 配置
-
-服务由 `/etc/config/miaomiaowu` 驱动，procd 管理：
+## 目录结构
 
 ```
-config miaomiaowu 'miaomiaowu'
-	option enabled '1'
-	option port '7852'
-	option database_path '/etc/mmw/traffic.db'
-	option log_level 'info'
+.
+├── .github/workflows/     GitHub Actions 工作流
+│   ├── mihomo.yml         编译 mihomo 规则（.yaml/.mrs）
+│   ├── singbox.yml        编译 sing-box 规则（.json/.srs）
+│   └── deploy-pages.yml   生成浏览页并推送到 Cloudflare Pages
+├── script/                构建脚本
+│   ├── common.py          规则拉取/解析/统一格式的公共逻辑
+│   ├── build_mihomo.py    生成 mihomo 规则
+│   ├── build_singbox.py   生成 sing-box 规则
+│   └── generate_index.py  生成可浏览的静态首页
+├── links/                 规则源列表（改这里就能加规则）
+│   ├── links-domain.txt   只含域名规则的源
+│   ├── links-ipcidr.txt   只含 IP/CIDR 规则的源
+│   └── links-mixed.txt    域名和IP混在一起的源，脚本会自动拆分
+├── rule/
+│   ├── mihomo/<名字>/     每个规则一个文件夹，装 <名字>_Domain.yaml/.mrs、<名字>_IP.yaml/.mrs
+│   └── singbox/<名字>/    每个规则一个文件夹，装 <名字>_Domain.json/.srs、<名字>_IP.json/.srs
+├── icon/                  图标/图片素材，推送后可直接在浏览页复制 CDN 直链
+└── _headers               Cloudflare Pages 缓存策略配置
 ```
 
-改完执行 `/etc/init.d/miaomiaowu restart` 生效，或者直接在 LuCI 网页里改。
+## 怎么加一条新规则
 
-## 免责声明
+打开 `links/` 里对应的 txt 文件，每行一条，格式：
 
-本仓库只做打包分发，不对 miaomiaowu 本体的功能、安全性做背书，问题请优先到[上游仓库](https://github.com/iluobei/miaomiaowu)反馈；打包/软件源相关的问题（装不上、签名校验失败、架构识别错误等）欢迎在本仓库提 issue。
-
-## License
-
-MIT
-
-## 手动本地打包（调试用）
-
-```sh
-# 以 arm64 为例，编译前需要自己 checkout 好上游源码并 npm run build 前端
-GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o mmw-bin ./cmd/server
-./scripts/build-ipk.sh mmw-bin aarch64_cortex-a53 1.0.0 ./dist
+```
+自定义名字 规则源链接
 ```
 
-## 免责声明
+不写名字也行，脚本会用链接里的文件名当名字。支持的规则源类型：
 
-本仓库只做打包分发，不对 miaomiaowu 本体的功能、安全性做背书，问题请优先到[上游仓库](https://github.com/iluobei/miaomiaowu)反馈；打包/软件源相关的问题（装不上、签名校验失败、架构识别错误等）欢迎在本仓库提 issue。
+| 前缀 | 说明 |
+|---|---|
+| （无前缀） | 纯文本规则（Clash txt/list、Meta yaml 等），自动解析 |
+| `srs:` | sing-box 编译好的 `.srs` 文件，会反解成统一格式 |
+| `json:` | sing-box 规则的 `.json` 源文件 |
+| `mrs:` | mihomo 的 `.mrs` 文件（官方暂无反解工具，会被跳过） |
+| `adguard:` | AdGuard 格式规则列表 |
 
-## License
+三个文件里放的链接，不管写在哪个文件，脚本都会按内容自动识别是域名规则还是 IP 规则，分别写进对应文件里，不用自己纠结该放哪个文件。
 
-MIT
+## 自动构建 & 部署节奏
+
+- `mihomo.yml`：每天定时构建 mihomo 规则，也可以手动触发（Actions 页面点 `Run workflow`）
+- `singbox.yml`：每天定时构建 sing-box 规则，同样支持手动触发
+- `deploy-pages.yml`：每 12 小时自动把最新内容推送到 Cloudflare Pages，也可以手动触发
+
+**注意**：规则构建和网站部署是分开的两个流程，互不自动触发。如果你手动改了规则源想立刻看到效果，顺序是：先手动跑一遍 `mihomo.yml`/`singbox.yml`（等两个都跑完），再手动跑一次 `deploy-pages.yml`。
+
+## 怎么用生成的规则
+
+打开 https://445568.xyz ，像逛文件夹一样点进去，例如 `rule/mihomo/google/`，能看到：
+
+- 点文件名：直接打开/预览这个文件（`.md` 文件会渲染成 GitHub 那种排版）
+- 点复制按钮：拿到这个文件的 CDN 直链，粘贴到 Clash / mihomo / sing-box 的 `rule-providers` 或 `rule_set` 配置里就能订阅
+
+## 需要配置的 GitHub Secrets
+
+| 名称 | 说明 |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 账号 ID |
+| `CLOUDFLARE_PAGES` | Cloudflare Pages 项目名 |
