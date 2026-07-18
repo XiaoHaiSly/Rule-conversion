@@ -11,7 +11,6 @@ except ImportError:
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 
-# 隐藏 git 内部目录、.github（不会被部署到 Cloudflare Pages）、links（原始链接列表，不对外展示）和一些构建缓存，其余全部展示（icon / script / georules / 任何后缀文件都要露出来）
 HIDDEN_ALWAYS = {'.git', '.github', 'links'}
 EXCLUDE_DIRS = {'__pycache__', 'node_modules'}
 EXCLUDE_FILES = {'index.html'}
@@ -204,7 +203,6 @@ def collect_entries(dir_path):
             if os.path.splitext(name)[1].lower() in EXCLUDE_FILE_EXTS:
                 continue
             if name.lower().endswith(tuple(ext + '.html' for ext in MD_EXTS)):
-                # 这是 md 文件自动生成的渲染预览页，不单独列出来
                 continue
             files.append((name, os.path.getsize(full)))
     return dirs, files
@@ -220,7 +218,7 @@ def count_files_recursive(dir_path):
 
 
 def breadcrumb_html(rel_parts):
-    segs = ['<a href="/">Rule Feed</a>' if rel_parts else '<span>Rule Feed</span>']
+    segs = ['<a href="/">𝘙𝘶𝘭𝘦 𝘍𝘦𝘦𝘥</a>' if rel_parts else '<span>Rule Feed</span>']
     acc = ""
     for i, part in enumerate(rel_parts):
         acc += part + "/"
@@ -246,7 +244,7 @@ def page_shell(title, crumb, body):
 {crumb}
 <h1>{html_lib.escape(title)}</h1>
 {body}
-<footer>由 <a href="https://github.com/XiaoHaiSly" target="_blank" rel="noopener noreferrer">XiaoHaiSly</a> 维护</footer>
+<footer><a href="https://github.com/XiaoHaiSly" target="_blank" rel="noopener noreferrer">𝑋𝑖𝑎𝑜𝐻𝑎𝑖𝑆𝑙𝑦</a></footer>
 </div>
 <script>{SCRIPT}</script>
 </body>
