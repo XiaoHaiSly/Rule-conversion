@@ -25,11 +25,17 @@ jobs:
     - name: Generate index pages
       run: python3 script/generate_index.py
 
+    - name: Prepare deploy directory (exclude .github)
+      run: |
+        rm -rf .deploy
+        mkdir .deploy
+        rsync -a --exclude='.git' --exclude='.github' --exclude='.deploy' ./ ./.deploy/
+
     - name: Deploy to Cloudflare Pages
       uses: cloudflare/pages-action@v1
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         projectName: ${{ secrets.CLOUDFLARE_PAGES }}
-        directory: .
+        directory: .deploy
         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
