@@ -36,12 +36,12 @@ jobs:
       run: python build_surge.py
       working-directory: ./script/
 
-    - name: Commit and push rules/quantumultx + rules/surge + geo-data/quantumultx + geo-data/surge
+    - name: Commit and push rules/quantumultx + rules/surge + georules/quantumultx + georules/surge
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
 
-        git add ./rules/quantumultx ./rules/surge ./geo-data/quantumultx ./geo-data/surge ./links/links-meta.txt
+        git add ./rules/quantumultx ./rules/surge ./georules/quantumultx ./georules/surge ./links/links-meta.txt
 
         if git diff --staged --quiet; then
           echo "No changes to commit"

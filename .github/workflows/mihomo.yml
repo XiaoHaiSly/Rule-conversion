@@ -47,7 +47,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Fetch geo-data raw files (no conversion)
+    - name: Fetch georules raw files (no conversion)
       run: python fetch_geodata_files.py
       working-directory: ./script/
 
@@ -55,12 +55,12 @@ jobs:
       run: python build_mihomo.py
       working-directory: ./script/
 
-    - name: Commit and push rules/mihomo + geo-data/mihomo
+    - name: Commit and push rules/mihomo + georules/mihomo
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
 
-        git add ./rules/mihomo ./geo-data/mihomo ./geo-data/geodata ./links/links-meta.txt ./links/links-geodata.txt
+        git add ./rules/mihomo ./georules/mihomo ./georules/geodata ./links/links-meta.txt ./links/links-geodata.txt
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
