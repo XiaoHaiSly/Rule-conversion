@@ -218,7 +218,7 @@ def count_files_recursive(dir_path):
 
 
 def breadcrumb_html(rel_parts):
-    segs = ['<a href="/">𝘙𝘶𝘭𝘦 𝘍𝘦𝘦𝘥</a>' if rel_parts else '<span>𝘙𝘶𝘭𝘦 𝘍𝘦𝘦𝘥</span>']
+    segs = ['<a href="/">𝘗𝘳𝘰𝘹𝘺</a>' if rel_parts else '<span>𝘗𝘳𝘰𝘹𝘺</span>']
     acc = ""
     for i, part in enumerate(rel_parts):
         acc += part + "/"
@@ -253,7 +253,7 @@ def page_shell(title, crumb, body):
 
 def render_dir(dir_path, rel_parts):
     dirs, files = collect_entries(dir_path)
-    title = rel_parts[-1] if rel_parts else "Rule Feed"
+    title = rel_parts[-1] if rel_parts else "𝘗𝘳𝘰𝘹𝘺𝘏𝘶𝘣"
     crumb = breadcrumb_html(rel_parts)
     rel_dir = "/".join(rel_parts)
 
