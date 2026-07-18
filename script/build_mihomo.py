@@ -98,7 +98,7 @@ def build_group(name, links, work_dir, output_root):
     if mrs_unsupported:
         print(f"[提示] {name}: 以下字段 mihomo mrs 不支持，已跳过: {sorted(mrs_unsupported)}")
 
-    out_dir = os.path.join(output_root, name)
+    out_dir = output_root
     wrote = []
     if build_domain_files(domain_part, name, out_dir):
         wrote.append("Domain")
@@ -106,7 +106,7 @@ def build_group(name, links, work_dir, output_root):
         wrote.append("IP")
 
     if wrote:
-        print(f"[完成] {name} -> {output_root}/{name}/ ({','.join(wrote)})，共 {len(links)} 个源")
+        print(f"[完成] {name} -> {output_root}/ ({','.join(wrote)})，共 {len(links)} 个源")
     else:
         print(f"[跳过] {name}：过滤后没有可生成 mrs 的规则")
 

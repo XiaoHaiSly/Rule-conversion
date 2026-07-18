@@ -67,10 +67,9 @@ def build_group(name, links, work_dir, output_root):
     if leftover:
         print(f"[提示] {name}: 以下字段既不算域名也不算IP，已跳过: {leftover}")
 
-    out_dir = os.path.join(output_root, name)
-    list_path = os.path.join(out_dir, f"{name}.list")
+    list_path = os.path.join(output_root, f"{name}.list")
     if common.write_surge_list(domain_part, ipcidr_part, list_path):
-        print(f"[完成] {name} -> {output_root}/{name}/{name}.list，共 {len(links)} 个源")
+        print(f"[完成] {name} -> {output_root}/{name}.list，共 {len(links)} 个源")
     else:
         print(f"[跳过] {name}：过滤后没有可写入的规则")
 

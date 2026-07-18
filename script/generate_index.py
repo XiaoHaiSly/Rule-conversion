@@ -11,7 +11,7 @@ except ImportError:
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 
-# 隐藏 git 内部目录、.github（不会被部署到 Cloudflare Pages）和一些构建缓存，其余全部展示（icon / script / 任何后缀文件都要露出来）
+# 隐藏 git 内部目录、.github（不会被部署到 Cloudflare Pages）和一些构建缓存，其余全部展示（icon / script / geo-data / 任何后缀文件都要露出来）
 HIDDEN_ALWAYS = {'.git', '.github'}
 EXCLUDE_DIRS = {'__pycache__', 'node_modules'}
 EXCLUDE_FILES = {'index.html'}
