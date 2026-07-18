@@ -174,70 +174,70 @@
         "tag": "ads_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/AWAvenue/AWAvenue_Domain.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/domain/AWAvenue.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "cn_ip",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/china/china_IP.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/ipcidr/china.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "cn_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/china/china_Domain.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/domain/china.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "google_ip",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/google/google_IP.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/ipcidr/google.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "google_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/google/google_Domain.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/domain/google.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "openai_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/Ai/Ai_Domain.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/domain/Ai.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "proxy_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/proxy/proxy_Domain.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/domain/proxy.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "telegram_ip",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/telegram/telegram_IP.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/ipcidr/telegram.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "telegram_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/telegram/telegram_Domain.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/domain/telegram.srs",
         "download_detour": "Direct"
       },
       {
         "tag": "youtube_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://xiaohai-proxy.445568.xyz/rules/singbox/youtube/youtube_Domain.srs",
+        "url": "https://xiaohaisly.445568.xyz/rules/singbox/domain/youtube.srs",
         "download_detour": "Direct"
       }
     ],
