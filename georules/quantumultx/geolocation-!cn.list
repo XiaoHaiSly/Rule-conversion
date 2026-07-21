@@ -565,6 +565,7 @@ HOST,time5.facebook.com
 HOST,tlmr-hamivideo2.cdn.hinet.net
 HOST,tmdb-image-prod.b-cdn.net
 HOST,tmdb-web-image-prod.b-cdn.net
+HOST,trojan-gfw.github.io
 HOST,tv.applemusic.com
 HOST,tvcastlive-hamivideo.cdn.hinet.net
 HOST,ubisoft-orbit-savegames.s3.amazonaws.com
@@ -734,6 +735,7 @@ HOST,wwis-dubc1-vip99.adobe.com
 HOST,www-cdn.icloud.com.akadns.net
 HOST,www.microsoft.com
 HOST,www.quora.com.cdn.cloudflare.net
+HOST,xtls.github.io
 HOST,yangzhi.app
 HOST,yt3.googleusercontent.com
 HOST,zeenews-fonts.s3.amazonaws.com
@@ -4086,6 +4088,7 @@ HOST-SUFFIX,berlincompanions.com
 HOST-SUFFIX,berlinerbericht.de
 HOST-SUFFIX,berlintwitterwall.com
 HOST-SUFFIX,best-sex-games.com
+HOST-SUFFIX,best2pay.net
 HOST-SUFFIX,best4bim.com
 HOST-SUFFIX,bestbeats4u.com
 HOST-SUFFIX,bestbhy.com
@@ -6227,6 +6230,7 @@ HOST-SUFFIX,clashmini.com
 HOST-SUFFIX,clashofclans.com
 HOST-SUFFIX,clashroyale.com
 HOST-SUFFIX,clashroyaleapp.com
+HOST-SUFFIX,clashyun.com
 HOST-SUFFIX,clasporno.org
 HOST-SUFFIX,classicalguitarblog.net
 HOST-SUFFIX,classicnike.com
@@ -8826,6 +8830,8 @@ HOST-SUFFIX,f-dro1d.org
 HOST-SUFFIX,f-droid.com
 HOST-SUFFIX,f-droid.org
 HOST-SUFFIX,f-secure.com
+HOST-SUFFIX,f1.com
+HOST-SUFFIX,f1tv.com
 HOST-SUFFIX,f2pool.com
 HOST-SUFFIX,f5pf.com
 HOST-SUFFIX,f6.dev
@@ -9654,6 +9660,7 @@ HOST-SUFFIX,form.new
 HOST-SUFFIX,formit360.com
 HOST-SUFFIX,formitfactory.com
 HOST-SUFFIX,forms.new
+HOST-SUFFIX,formula1.com
 HOST-SUFFIX,forpojie.pics
 HOST-SUFFIX,forshtadt.ru
 HOST-SUFFIX,fortawesome.com
@@ -12362,6 +12369,7 @@ HOST-SUFFIX,hustlercash.com
 HOST-SUFFIX,hutao.cloud
 HOST-SUFFIX,hutianyi.net
 HOST-SUFFIX,hutpromos.com
+HOST-SUFFIX,hva.im
 HOST-SUFFIX,hwayue.org.tw
 HOST-SUFFIX,hwgo.com
 HOST-SUFFIX,hwslabs.com
@@ -19836,8 +19844,10 @@ HOST-SUFFIX,rbmavericks.com
 HOST-SUFFIX,rbnainternational.com
 HOST-SUFFIX,rbplc.com
 HOST-SUFFIX,rbrandlibrary.com
+HOST-SUFFIX,rbsgate.com
 HOST-SUFFIX,rbsgr.com
 HOST-SUFFIX,rbspeakup.com
+HOST-SUFFIX,rbsuat.com
 HOST-SUFFIX,rbth.com
 HOST-SUFFIX,rbx.com
 HOST-SUFFIX,rbxcdn.com
@@ -22226,6 +22236,7 @@ HOST-SUFFIX,synologyupdate.com
 HOST-SUFFIX,syosetu.com
 HOST-SUFFIX,sysinternals.com
 HOST-SUFFIX,system76.com
+HOST-SUFFIX,sysub.com
 HOST-SUFFIX,syzbj36.xyz
 HOST-SUFFIX,szabadeuropa.hu
 HOST-SUFFIX,szcheapmonsterheadphones.com
