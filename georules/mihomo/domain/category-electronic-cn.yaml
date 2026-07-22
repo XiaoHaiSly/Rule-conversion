@@ -10,6 +10,8 @@ payload:
 - +.elecfans.com
 - +.fa-part.com
 - +.forface3d.com
+- +.gosinoic.com
+- +.h3c.com
 - +.hqchip.com
 - +.hqdoc.com
 - +.hqpcb.com
@@ -51,6 +53,7 @@ payload:
 - +.lckfb.com
 - +.listenai.com
 - +.maixhub.com
+- +.moedu.com
 - +.oshwhub.com
 - +.quecmall.cn
 - +.quectel.com.cn
@@ -64,7 +67,18 @@ payload:
 - +.sz-jlc.com
 - +.szjlc.cn
 - +.szlcsc.com
+- +.thunis.com
 - +.ti.com.cn
+- +.tsinghuaic.com
+- +.tsingtengms.com
+- +.unicloud.com
+- +.unigroup.com.cn
+- +.uniscan.cn
+- +.unisdigital.com
+- +.unisemicon.com
+- +.unisoc.com
+- +.unispc.com
+- +.uniswdc.com
 - +.wch-ic.com
 - +.wch.cn
 - +.ymtc.cn
